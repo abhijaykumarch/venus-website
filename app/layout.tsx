@@ -1,7 +1,7 @@
 import { Playfair_Display, Manrope } from 'next/font/google';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import './global.css';
+import "./global.css";
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
