@@ -21,30 +21,60 @@ const ContactPage = () => {
     eventType: 'Luxury Wedding',
     message: '',
   });
+
   const [state, setState] = useState<FormState>('idle');
 
   const update =
     (k: keyof ContactForm) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
+    (
+      e: ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) =>
+      setForm((f) => ({
+        ...f,
+        [k]: e.target.value,
+      }));
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!form.name || !form.email.includes('@') || !form.message) {
       setState('error');
       return;
     }
+
     setState('loading');
+
     try {
-      await fetch('/api/contact', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(form),
       });
-    } catch {
-      // ignore
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        console.error('API ERROR:', data);
+        setState('error');
+        return;
+      }
+
+      setState('done');
+
+      setForm({
+        name: '',
+        email: '',
+        eventType: 'Luxury Wedding',
+        message: '',
+      });
+    } catch (error) {
+      console.error('SUBMIT ERROR:', error);
+      setState('error');
     }
-    setState('done');
   };
 
   return (
@@ -53,15 +83,19 @@ const ContactPage = () => {
 
       <section className="relative bg-brand-darkpurple pt-32 pb-20 text-white">
         <div className="pointer-events-none absolute inset-6 hidden border border-brand-gold/15 md:block" />
+
         <div className="container text-center">
           <p className="mb-4 text-[0.7rem] uppercase tracking-[0.5em] text-brand-gold">
             Begin the Journey
           </p>
+
           <h1 className="font-display text-5xl leading-[1.1] text-balance md:text-6xl lg:text-7xl">
             Share your
             <span className="gold-gradient-text italic"> vision</span>.
           </h1>
+
           <div className="hairline mx-auto mt-10 w-24" />
+
           <p className="mx-auto mt-8 max-w-xl text-base leading-relaxed text-white/70">
             Tell us a little about the celebration you have in mind. A founding
             partner will personally respond within two working days.
@@ -80,6 +114,7 @@ const ContactPage = () => {
                 <span className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                   Full Name
                 </span>
+
                 <input
                   type="text"
                   value={form.name}
@@ -89,10 +124,12 @@ const ContactPage = () => {
                   placeholder="Your name"
                 />
               </label>
+
               <label className="flex flex-col gap-2">
                 <span className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                   Email
                 </span>
+
                 <input
                   type="email"
                   value={form.email}
@@ -102,10 +139,12 @@ const ContactPage = () => {
                   placeholder="you@domain.com"
                 />
               </label>
+
               <label className="flex flex-col gap-2 sm:col-span-2">
                 <span className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                   Event Type
                 </span>
+
                 <select
                   value={form.eventType}
                   onChange={update('eventType')}
@@ -118,17 +157,19 @@ const ContactPage = () => {
                   <option>Other</option>
                 </select>
               </label>
+
               <label className="flex flex-col gap-2 sm:col-span-2">
                 <span className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                   Tell us about your celebration
                 </span>
+
                 <textarea
                   rows={5}
                   value={form.message}
                   onChange={update('message')}
                   required
                   className="border-b border-black/10 bg-transparent py-3 text-base text-brand-darkpurple placeholder:text-brand-darkpurple/30 focus:border-brand-gold focus:outline-none"
-                  placeholder="Dates, guest count, location, and anything else we should know\u2026"
+                  placeholder="Dates, guest count, location, and anything else we should know…"
                 />
               </label>
             </div>
@@ -140,7 +181,8 @@ const ContactPage = () => {
             >
               {state === 'done' ? (
                 <>
-                  <Check className="h-4 w-4" /> Received — thank you
+                  <Check className="h-4 w-4" />
+                  Received — thank you
                 </>
               ) : state === 'loading' ? (
                 'Sending…'
@@ -154,9 +196,10 @@ const ContactPage = () => {
 
             {state === 'error' && (
               <p className="mt-4 text-xs text-red-500">
-                Please complete all required fields.
+                Something went wrong. Please try again.
               </p>
             )}
+
             {state === 'done' && (
               <p className="mt-4 text-xs text-brand-purple">
                 A founding partner will personally respond shortly.
@@ -169,9 +212,11 @@ const ContactPage = () => {
               <p className="mb-4 text-[0.7rem] uppercase tracking-[0.5em] text-brand-gold">
                 The Atelier
               </p>
+
               <p className="font-display text-3xl text-brand-darkpurple">
                 Visit us, or invite us to you.
               </p>
+
               <p className="mt-5 text-sm leading-[1.8] text-brand-darkpurple/70">
                 For discretion, first consultations are by appointment only. We
                 are happy to meet at our atelier or at a venue of your choice.
@@ -181,21 +226,26 @@ const ContactPage = () => {
             <div className="space-y-6">
               <div className="flex items-start gap-4 border-t border-black/5 pt-6">
                 <MapPin className="mt-1 h-4 w-4 text-brand-gold" />
+
                 <div>
                   <p className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                     Atelier
                   </p>
+
                   <p className="mt-1 font-display text-base text-brand-darkpurple">
-                    L-17,KP1 Jaypee Wishtown, Noida, India
+                    L-17, KP1 Jaypee Wishtown, Noida, India
                   </p>
                 </div>
               </div>
+
               <div className="flex items-start gap-4 border-t border-black/5 pt-6">
                 <Mail className="mt-1 h-4 w-4 text-brand-gold" />
+
                 <div>
                   <p className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                     Email
                   </p>
+
                   <a
                     href="mailto:hello@venusgrandeurevents.com"
                     className="mt-1 block font-display text-base text-brand-darkpurple transition hover:text-brand-gold"
@@ -204,12 +254,15 @@ const ContactPage = () => {
                   </a>
                 </div>
               </div>
+
               <div className="flex items-start gap-4 border-t border-black/5 pt-6">
                 <Phone className="mt-1 h-4 w-4 text-brand-gold" />
+
                 <div>
                   <p className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
                     Phone
                   </p>
+
                   <a
                     href="tel:+919520957666"
                     className="mt-1 block font-display text-base text-brand-darkpurple transition hover:text-brand-gold"
