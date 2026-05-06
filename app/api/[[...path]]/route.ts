@@ -28,6 +28,7 @@ const BRAND_DARK = '#2E0D2E';
 interface EnquiryPayload {
   name: string;
   email: string;
+  phone: string;
   eventType: string;
   message: string;
 }
@@ -70,7 +71,7 @@ ${bodyHtml}
 <td style="padding:24px 40px 40px;border-top:1px solid #f0ecec;color:#888;font-size:12px;line-height:1.7;">
 Venus Grandeur Events · Private Atelier
 <br>
-One Grandeur Square, Mumbai · hello@venusgrandeurevents.com
+hello@venusgrandeurevents.com
 </td>
 </tr>
 
@@ -90,6 +91,7 @@ One Grandeur Square, Mumbai · hello@venusgrandeurevents.com
 const adminEnquiryHtml = ({
   name,
   email,
+  phone,
   eventType,
   message,
 }: EnquiryPayload): string =>
@@ -125,6 +127,16 @@ Email
 <a href="mailto:${email}" style="color:${BRAND_PURPLE};text-decoration:none;">
 ${email}
 </a>
+</td>
+</tr>
+
+<tr>
+<td style="padding:14px 0;border-bottom:1px solid #f0ecec;font-size:11px;color:${BRAND_GOLD};text-transform:uppercase;letter-spacing:2px;">
+Phone
+</td>
+
+<td style="padding:14px 0;border-bottom:1px solid #f0ecec;font-size:15px;color:${BRAND_DARK};">
+${phone}
 </td>
 </tr>
 
@@ -178,9 +190,15 @@ async function handler(
     if (path === 'contact' && request.method === 'POST') {
       const body = (await request.json()) as Partial<EnquiryPayload>;
 
-      const { name, email, eventType, message } = body || {};
+      const { name, email, phone, eventType, message } = body || {};
 
-      if (!name || !email || !email.includes('@') || !message) {
+      if (
+        !name ||
+        !email ||
+        !email.includes('@') ||
+        !phone ||
+        !message
+      ) {
         return NextResponse.json(
           {
             ok: false,
@@ -193,6 +211,7 @@ async function handler(
       const clean: EnquiryPayload = {
         name: String(name).trim().slice(0, 200),
         email: String(email).toLowerCase().trim().slice(0, 200),
+        phone: String(phone).trim().slice(0, 30),
         eventType: String(eventType || 'Other').trim().slice(0, 100),
         message: String(message).trim().slice(0, 5000),
       };
@@ -206,27 +225,23 @@ async function handler(
 
       try {
         if (resend && adminEmail) {
-          const adminMail = await resend.emails.send({
+          await resend.emails.send({
             from: `Venus Grandeur Enquiries <${fromEmail}>`,
             to: [adminEmail],
             replyTo: clean.email,
             subject: `New enquiry · ${clean.name} · ${clean.eventType}`,
             html: adminEnquiryHtml(clean),
           });
-
-          console.log('Admin email sent:', adminMail);
         }
 
         if (resend) {
-          const clientMail = await resend.emails.send({
+          await resend.emails.send({
             from: `Venus Grandeur Events <${fromEmail}>`,
             to: [clean.email],
             subject:
               'We have received your enquiry · Venus Grandeur Events',
             html: clientAckHtml(clean),
           });
-
-          console.log('Client email sent:', clientMail);
         }
       } catch (emailError) {
         console.error('EMAIL ERROR:', emailError);

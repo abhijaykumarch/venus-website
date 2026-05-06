@@ -10,6 +10,7 @@ type FormState = 'idle' | 'loading' | 'done' | 'error';
 interface ContactForm {
   name: string;
   email: string;
+  phone: string;
   eventType: string;
   message: string;
 }
@@ -18,6 +19,7 @@ const ContactPage = () => {
   const [form, setForm] = useState<ContactForm>({
     name: '',
     email: '',
+    phone: '',
     eventType: 'Luxury Wedding',
     message: '',
   });
@@ -39,7 +41,12 @@ const ContactPage = () => {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!form.name || !form.email.includes('@') || !form.message) {
+    if (
+      !form.name ||
+      !form.email.includes('@') ||
+      !form.phone ||
+      !form.message
+    ) {
       setState('error');
       return;
     }
@@ -68,6 +75,7 @@ const ContactPage = () => {
       setForm({
         name: '',
         email: '',
+        phone: '',
         eventType: 'Luxury Wedding',
         message: '',
       });
@@ -137,6 +145,21 @@ const ContactPage = () => {
                   required
                   className="border-b border-black/10 bg-transparent py-3 text-base text-brand-darkpurple placeholder:text-brand-darkpurple/30 focus:border-brand-gold focus:outline-none"
                   placeholder="you@domain.com"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 sm:col-span-2">
+                <span className="text-[0.6rem] uppercase tracking-[0.35em] text-brand-gold">
+                  Phone Number
+                </span>
+
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={update('phone')}
+                  required
+                  className="border-b border-black/10 bg-transparent py-3 text-base text-brand-darkpurple placeholder:text-brand-darkpurple/30 focus:border-brand-gold focus:outline-none"
+                  placeholder="+91 9876543210"
                 />
               </label>
 
